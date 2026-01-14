@@ -1,18 +1,14 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "orphan_art_connect");
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include 'db.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 $email = $data['email'];
 $password = $data['password'];
 
-$sql = "SELECT * FROM users WHERE email = ?";
+$sql = "SELECT * FROM users WHERE email = ? OR name = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $email);
+$stmt->bind_param("ss", $email, $email);
 $stmt->execute();
 
 $result = $stmt->get_result();
@@ -20,10 +16,10 @@ $result = $stmt->get_result();
 if ($result->num_rows === 1) {
     $user = $result->fetch_assoc();
 
-    // If password is hashed
-    if (password_verify($password, $user['password'])) {
+    // Plain text password comparison
+    if ($password == $user['password']) {
         echo json_encode([
-            "status" => "success",
+            "success" => true,
             "message" => "Login successful",
             "user" => [
                 "id" => $user['id'],
@@ -34,13 +30,13 @@ if ($result->num_rows === 1) {
         ]);
     } else {
         echo json_encode([
-            "status" => "error",
+            "success" => false,
             "message" => "Invalid password"
         ]);
     }
 } else {
     echo json_encode([
-        "status" => "error",
+        "success" => false,
         "message" => "User not found"
     ]);
 }

@@ -1,12 +1,14 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = ""; 
+$servername = "localhost";
+$username = "root";
+$password = "";
 $dbname = "orphan_art_connect";
 
-$conn = mysqli_connect($host, $user, $pass, $dbname);
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+// Check connection
+if ($conn->connect_error) {
+    die(json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]));
 }
 ?>
